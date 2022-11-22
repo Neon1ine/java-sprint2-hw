@@ -1,8 +1,10 @@
 import java.util.ArrayList;
+import static java.lang.System.exit;
 
 public class ReportBase {
 
     static MonthReport[] monthReports = new MonthReport[12];
+    static ArrayList<MonthItem> yearlyReport = new ArrayList<>();
 
     public static void getReportsForAllMonths() {
         for (int i = 1; i <= 3; i++) {
@@ -13,22 +15,20 @@ public class ReportBase {
 
     public static ArrayList<Item> getMonthReport(int month) {
         String s = FileReader.readFileContentsOrNull("resources/m.20210" + month + ".csv");
+        if (s == null) exit(0);
         String[] lines = s.split("\\n");
         ArrayList<Item> itemArr = new ArrayList<>();
-
         for (int i = 1; i < lines.length; i++){
             String[] items = lines[i].split(",");
             Item item = new Item(items[0], Boolean.parseBoolean(items[1]), Integer.parseInt(items[2]), Integer.parseInt(items[3]));
             itemArr.add(item);
         }
-
         return itemArr;
     }
 
-    static ArrayList<MonthItem> yearlyReport = new ArrayList<>();
-
     public static void getYearlyReport() {
         String s = FileReader.readFileContentsOrNull("resources/y.2021.csv");
+        if (s == null) exit(0);
         String[] lines = s.split("\\n");
         for (int i = 1; i < lines.length; i++) {
             String[] items = lines[i].split(",");
@@ -39,24 +39,14 @@ public class ReportBase {
 
     public static int checkReports() {
         for (int i = 0; i < 3; i++) {
-            int eSum = 0;
-            int notESum = 0;
+            int sum = 0;
             for (int j = 0; j < monthReports[i].itemsFromFile.size(); j++) {
                 if (monthReports[i].itemsFromFile.get(j).isExpense)
-                    eSum += monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
+                    sum -= monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
                 else
-                    notESum += monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
+                    sum += monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
             }
-            if (yearlyReport.get(i * 2).isExpense) {
-                if (yearlyReport.get(i * 2).amount != eSum) return yearlyReport.get(i * 2).month;
-            } else {
-                if (yearlyReport.get(i * 2).amount != notESum) return yearlyReport.get(i * 2).month;
-            }
-            if (yearlyReport.get(i * 2 + 1).isExpense) {
-                if (yearlyReport.get(i * 2 + 1).amount != eSum) return yearlyReport.get(i * 2 + 1).month;
-            } else {
-                if (yearlyReport.get(i * 2 + 1).amount != notESum) return yearlyReport.get(i * 2 + 1).month;
-            }
+            if (sum != findIncomeForMonth(i)) return i + 1;
         }
         return -1;
     }
@@ -103,12 +93,13 @@ public class ReportBase {
     }
 
     public static int findIncomeForMonth(int month) {
-        month--;
         int sum = 0;
-        if (yearlyReport.get(month * 2 + 1).isExpense) sum -= yearlyReport.get(month * 2 + 1).amount;
-        else sum += yearlyReport.get(month * 2 + 1).amount;
-        if (yearlyReport.get(month * 2).isExpense) sum -= yearlyReport.get(month * 2).amount;
-        else sum += yearlyReport.get(month * 2).amount;
+        for (int i = 0; i < yearlyReport.size(); i++) {
+            if (yearlyReport.get(i).month == month + 1) {
+                if (yearlyReport.get(i).isExpense) sum -= yearlyReport.get(i).amount;
+                else sum += yearlyReport.get(i).amount;
+            }
+        }
         return sum;
     }
 

@@ -10,14 +10,18 @@ public class Main {
             int menuChoice = scanner.nextInt();
             switch (menuChoice) {
                 case 1:
-                    ReportBase.getReportsForAllMonths();
-                    isMReportsDone = true;
-                    System.out.println("Все месячные отчёты считаны.");
+                    if (!isMReportsDone) {
+                        ReportBase.getReportsForAllMonths();
+                        isMReportsDone = true;
+                        System.out.println("Все месячные отчёты считаны.");
+                    } else System.out.println("Отсчёты уже считаны.");
                     break;
                 case 2:
-                    ReportBase.getYearlyReport();
-                    isYReportDone = true;
-                    System.out.println("Годовой отчёт считан.");
+                    if (!isYReportDone) {
+                        ReportBase.getYearlyReport();
+                        isYReportDone = true;
+                        System.out.println("Годовой отчёт считан.");
+                    } else System.out.println("Отсчёты уже считаны.");
                     break;
                 case 3:
                     if (isMReportsDone && isYReportDone) {
@@ -70,7 +74,7 @@ public class Main {
         System.out.println("Рассматриваемый год: 2021" +
                 "\nПрибыль по каждому месяцу:");
         for (int i = 1; i <= 3; i++)
-            System.out.println(i + " месяц: " + ReportBase.findIncomeForMonth(i));
+            System.out.println(i + " месяц: " + ReportBase.findIncomeForMonth(i - 1));
         System.out.println("Средний расход за все месяцы в году: " + ReportBase.averageFlowForYear(true) +
                 "\nСредний доход за все месяцы в году: " + ReportBase.averageFlowForYear(false));
     }
