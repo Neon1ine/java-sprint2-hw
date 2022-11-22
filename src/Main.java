@@ -3,39 +3,41 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        boolean isReportsForMonthsDone = false;
-        boolean isReportsForYearDone = false;
+        boolean isMReportsDone = false;
+        boolean isYReportDone = false;
         while (true) {
             printMenu();
             int menuChoice = scanner.nextInt();
             switch (menuChoice) {
                 case 1:
                     ReportBase.getReportsForAllMonths();
-                    isReportsForMonthsDone = true;
+                    isMReportsDone = true;
                     System.out.println("Все месячные отчёты считаны.");
-                    //System.out.println(ReportBase.monthReports[0].itemsFromFile.get(0).name);
                     break;
                 case 2:
                     ReportBase.getYearlyReport();
-                    isReportsForYearDone = true;
+                    isYReportDone = true;
                     System.out.println("Годовой отчёт считан.");
-                    //System.out.println(ReportBase.expenses.get(0).amount);
                     break;
                 case 3:
-                    if (isReportsForMonthsDone && isReportsForYearDone) {
-
-                    } else System.out.println("Отчёты ещё не считаны");
+                    if (isMReportsDone && isYReportDone) {
+                        int result = ReportBase.checkReports();
+                        if (result == -1) System.out.println("Отчёты сходятся.");
+                        else System.out.println("Отчёты не сходятся. Ошибка в месяце " + ReportBase.convertToMonthName(result) + ".");
+                    } else printWarning();
                     break;
                 case 4:
-
+                    if (isMReportsDone) printMonthlyReport();
+                    else printWarning();
                     break;
                 case 5:
-
+                    if (isYReportDone) printYearlyReport();
+                    else printWarning();
                     break;
                 case 6:
                     return;
                 default:
-                    System.out.println("Такой команды не существует!");
+                    System.out.println("Такой команды не существует.");
                     break;
             }
         }
@@ -50,6 +52,27 @@ public class Main {
                 "\n4. Вывести информацию о всех месячных отчётах;" +
                 "\n5. Вывести информацию о годовом отчёте;" +
                 "\n6. Выйти из программы.");
+    }
+
+    private static void printWarning() {
+        System.out.println("Отчёты ещё не считаны.");
+    }
+
+    private static void printMonthlyReport() {
+        for (int i = 0; i < 3; i++) {
+            System.out.println("Месяц " + ReportBase.convertToMonthName(i + 1) + ":" +
+                    "\nСамый прибыльный товар: " + ReportBase.findMostProfitableItem(i) +
+                    "\nСамая большая трата: " + ReportBase.findMostExpensiveItem(i));
+        }
+    }
+
+    private static void printYearlyReport() {
+        System.out.println("Рассматриваемый год: 2021" +
+                "\nПрибыль по каждому месяцу:");
+        for (int i = 1; i <= 3; i++)
+            System.out.println(i + " месяц: " + ReportBase.findIncomeForMonth(i));
+        System.out.println("Средний расход за все месяцы в году: " + ReportBase.averageFlowForYear(true) +
+                "\nСредний доход за все месяцы в году: " + ReportBase.averageFlowForYear(false));
     }
 
 }
