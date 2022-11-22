@@ -1,24 +1,30 @@
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
+        boolean isReportsForMonthsDone = false;
+        boolean isReportsForYearDone = false;
         while (true) {
             printMenu();
             int menuChoice = scanner.nextInt();
             switch (menuChoice) {
                 case 1:
-
+                    ReportBase.getReportsForAllMonths();
+                    isReportsForMonthsDone = true;
+                    System.out.println("Все месячные отчёты считаны.");
+                    //System.out.println(ReportBase.monthReports[0].itemsFromFile.get(0).name);
                     break;
                 case 2:
-
+                    ReportBase.getYearlyReport();
+                    isReportsForYearDone = true;
+                    System.out.println("Годовой отчёт считан.");
+                    //System.out.println(ReportBase.expenses.get(0).amount);
                     break;
                 case 3:
+                    if (isReportsForMonthsDone && isReportsForYearDone) {
 
+                    } else System.out.println("Отчёты ещё не считаны");
                     break;
                 case 4:
 
@@ -44,16 +50,6 @@ public class Main {
                 "\n4. Вывести информацию о всех месячных отчётах;" +
                 "\n5. Вывести информацию о годовом отчёте;" +
                 "\n6. Выйти из программы.");
-    }
-
-    private String readFileContentsOrNull(String path) {
-        try {
-            return Files.readString(Path.of(path));
-        } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с месячным отчётом. Возможно, " +
-                    "файл не находится в нужной директории.");
-            return null;
-        }
     }
 
 }
