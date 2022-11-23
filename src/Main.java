@@ -5,37 +5,36 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         boolean isMReportsDone = false;
         boolean isYReportDone = false;
+        ReportBase reportBase = new ReportBase();
         while (true) {
             printMenu();
             int menuChoice = scanner.nextInt();
             switch (menuChoice) {
                 case 1:
-                    if (!isMReportsDone) {
-                        ReportBase.getReportsForAllMonths();
+                    if (!reportBase.getReportsForAllMonths(isMReportsDone)) {
                         isMReportsDone = true;
                         System.out.println("Все месячные отчёты считаны.");
-                    } else System.out.println("Отсчёты уже считаны.");
+                    }
                     break;
                 case 2:
-                    if (!isYReportDone) {
-                        ReportBase.getYearlyReport();
+                    if (!reportBase.getYearlyReport(isYReportDone)) {
                         isYReportDone = true;
                         System.out.println("Годовой отчёт считан.");
-                    } else System.out.println("Отсчёты уже считаны.");
+                    }
                     break;
                 case 3:
                     if (isMReportsDone && isYReportDone) {
-                        int result = ReportBase.checkReports();
+                        int result = reportBase.checkReports();
                         if (result == -1) System.out.println("Отчёты сходятся.");
-                        else System.out.println("Отчёты не сходятся. Ошибка в месяце " + ReportBase.convertToMonthName(result) + ".");
+                        else System.out.println("Отчёты не сходятся. Ошибка в месяце " + reportBase.convertToMonthName(result) + ".");
                     } else printWarning();
                     break;
                 case 4:
-                    if (isMReportsDone) printMonthlyReport();
+                    if (isMReportsDone) printMonthlyReport(reportBase);
                     else printWarning();
                     break;
                 case 5:
-                    if (isYReportDone) printYearlyReport();
+                    if (isYReportDone) printYearlyReport(reportBase);
                     else printWarning();
                     break;
                 case 6:
@@ -62,21 +61,21 @@ public class Main {
         System.out.println("Отчёты ещё не считаны.");
     }
 
-    private static void printMonthlyReport() {
+    private static void printMonthlyReport(ReportBase reportBase) {
         for (int i = 0; i < 3; i++) {
-            System.out.println("Месяц " + ReportBase.convertToMonthName(i + 1) + ":" +
-                    "\nСамый прибыльный товар: " + ReportBase.findMostProfitableItem(i) +
-                    "\nСамая большая трата: " + ReportBase.findMostExpensiveItem(i));
+            System.out.println("Месяц " + reportBase.convertToMonthName(i + 1) + ":" +
+                    "\nСамый прибыльный товар: " + reportBase.findMostProfitableItem(i) +
+                    "\nСамая большая трата: " + reportBase.findMostExpensiveItem(i));
         }
     }
 
-    private static void printYearlyReport() {
+    private static void printYearlyReport(ReportBase reportBase) {
         System.out.println("Рассматриваемый год: 2021" +
                 "\nПрибыль по каждому месяцу:");
         for (int i = 1; i <= 3; i++)
-            System.out.println(i + " месяц: " + ReportBase.findIncomeForMonth(i - 1));
-        System.out.println("Средний расход за все месяцы в году: " + ReportBase.averageFlowForYear(true) +
-                "\nСредний доход за все месяцы в году: " + ReportBase.averageFlowForYear(false));
+            System.out.println(i + " месяц: " + reportBase.findIncomeForMonth(i - 1));
+        System.out.println("Средний расход за все месяцы в году: " + reportBase.averageFlowForYear(true) +
+                "\nСредний доход за все месяцы в году: " + reportBase.averageFlowForYear(false));
     }
 
 }

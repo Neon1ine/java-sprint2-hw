@@ -1,21 +1,28 @@
 import java.util.ArrayList;
-import static java.lang.System.exit;
 
 public class ReportBase {
 
-    static MonthReport[] monthReports = new MonthReport[12];
-    static ArrayList<MonthItem> yearlyReport = new ArrayList<>();
+    MonthReport[] monthReports = new MonthReport[12];
+    ArrayList<MonthItem> yearlyReport = new ArrayList<>();
 
-    public static void getReportsForAllMonths() {
+    public boolean getReportsForAllMonths(boolean isReportCreated) {
+        if (isReportCreated) clearMonthReports();
         for (int i = 1; i <= 3; i++) {
-            MonthReport monthReport = new MonthReport(getMonthReport(i), i);
-            monthReports[i-1] = monthReport;
+            ArrayList<Item> arr = getMonthReport(i);
+            if (arr.isEmpty()) return true;
+            MonthReport monthReport = new MonthReport(arr, i);
+            monthReports[i - 1] = monthReport;
         }
+        return false;
     }
 
-    public static ArrayList<Item> getMonthReport(int month) {
+    private void clearMonthReports() {
+        for (int i = 0; i < monthReports.length; i++)
+            monthReports[0].itemsFromFile.clear();
+    }
+
+    public ArrayList<Item> getMonthReport(int month) {
         String s = FileReader.readFileContentsOrNull("resources/m.20210" + month + ".csv");
-        if (s == null) exit(0);
         String[] lines = s.split("\\n");
         ArrayList<Item> itemArr = new ArrayList<>();
         for (int i = 1; i < lines.length; i++){
@@ -26,32 +33,38 @@ public class ReportBase {
         return itemArr;
     }
 
-    public static void getYearlyReport() {
+    public boolean getYearlyReport(boolean isReportCreated) {
+        if (isReportCreated) clearYearReport();
         String s = FileReader.readFileContentsOrNull("resources/y.2021.csv");
-        if (s == null) exit(0);
+        if (s == null) return true;
         String[] lines = s.split("\\n");
         for (int i = 1; i < lines.length; i++) {
             String[] items = lines[i].split(",");
             MonthItem item = new MonthItem(Integer.parseInt(items[0]), Integer.parseInt(items[1]), Boolean.parseBoolean(items[2]));
             yearlyReport.add(item);
         }
+        return false;
     }
 
-    public static int checkReports() {
+    private void clearYearReport() {
+        yearlyReport.clear();
+    }
+
+    public int checkReports() {
         for (int i = 0; i < 3; i++) {
             int sum = 0;
             for (int j = 0; j < monthReports[i].itemsFromFile.size(); j++) {
                 if (monthReports[i].itemsFromFile.get(j).isExpense)
-                    sum -= monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
+                    sum -= monthReports[i].itemsFromFile.get(j).amount;
                 else
-                    sum += monthReports[i].itemsFromFile.get(j).quantity * monthReports[i].itemsFromFile.get(j).sumOfOne;
+                    sum += monthReports[i].itemsFromFile.get(j).amount;
             }
             if (sum != findIncomeForMonth(i)) return i + 1;
         }
         return -1;
     }
 
-    public static String convertToMonthName(int i) {
+    public String convertToMonthName(int i) {
         switch (i) {
             case 1:
                 return "январь";
@@ -64,12 +77,12 @@ public class ReportBase {
         }
     }
 
-    public static String findMostProfitableItem(int month) {
+    public String findMostProfitableItem(int month) {
         int max = 0;
         String result = "";
         for (int i = 0; i < monthReports[month].itemsFromFile.size(); i++) {
             if (!monthReports[month].itemsFromFile.get(i).isExpense){
-                int value = monthReports[month].itemsFromFile.get(i).quantity * monthReports[month].itemsFromFile.get(i).sumOfOne;
+                int value = monthReports[month].itemsFromFile.get(i).amount;
                 if (max < value)
                     result = monthReports[month].itemsFromFile.get(i).name + " " + value;
                 max = value;
@@ -78,12 +91,12 @@ public class ReportBase {
         return result;
     }
 
-    public static String findMostExpensiveItem(int month) {
+    public String findMostExpensiveItem(int month) {
         int max = 0;
         String result = "";
         for (int i = 0; i < monthReports[month].itemsFromFile.size(); i++) {
             if (monthReports[month].itemsFromFile.get(i).isExpense){
-                int value = monthReports[month].itemsFromFile.get(i).quantity * monthReports[month].itemsFromFile.get(i).sumOfOne;
+                int value = monthReports[month].itemsFromFile.get(i).amount;
                 if (max < value)
                     result = monthReports[month].itemsFromFile.get(i).name + " " + value;
                 max = value;
@@ -92,7 +105,7 @@ public class ReportBase {
         return result;
     }
 
-    public static int findIncomeForMonth(int month) {
+    public int findIncomeForMonth(int month) {
         int sum = 0;
         for (int i = 0; i < yearlyReport.size(); i++) {
             if (yearlyReport.get(i).month == month + 1) {
@@ -103,7 +116,7 @@ public class ReportBase {
         return sum;
     }
 
-    public static double averageFlowForYear(boolean isExpense) {
+    public double averageFlowForYear(boolean isExpense) {
         double sum = 0;
         for (int i = 0; i < 6; i++) {
             if (isExpense && yearlyReport.get(i).isExpense) sum += yearlyReport.get(i).amount;
